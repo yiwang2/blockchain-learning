@@ -1,0 +1,5 @@
+package org.blockchain.learning.sample.fabcar.application;
+
+public class FabCarApplication {
+
+}

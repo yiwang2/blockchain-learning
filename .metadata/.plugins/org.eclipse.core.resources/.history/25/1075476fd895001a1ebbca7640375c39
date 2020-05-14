@@ -1,0 +1,5 @@
+package org.blockchain.learning.sample.fabcar.contract;
+
+public class FabCar {
+
+}

@@ -1,0 +1,9 @@
+package org.blockchain.learning.sample.fabcar.application;
+
+public class FabCarApplication {
+
+	
+	public static void main (String args[]) {
+		
+	}
+}
