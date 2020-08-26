@@ -12,5 +12,10 @@
 ## Deploy to Ganache
 
 - truffle migrate --compile-all --reset --network ganache
+- truffle console --network ganache
+- Greetings.deployed().then(function(instance){app=instance;}) 
+- app.getGreetings()
+- app.setGreetings("Hello")
+- app.getGreetings()
 
 
