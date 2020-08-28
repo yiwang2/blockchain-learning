@@ -13,3 +13,7 @@
 
 ## Test
 - truffle test --network ganache
+
+## UI
+- npm install
+- npm run dev
