@@ -8,7 +8,7 @@
 - truffle console --network ganache
 - ChainList.deployed().then(function(instance){app=instance;})
 - app.getArticle()
-- app.sellArticle("iPhone 7", "sell iPhone 7", web3.toWei(3, "ether"), {from: "0x59aC1F73cA4B4d9AA88B5C4041e8AB6Fce7A22a9"})
+- app.sellArticle("iPhone 7", "sell iPhone 7", web3.utils.toWei("3", "ether"), {from: "0x6aCB53bbF1E54FF6C9842bc74714D4680098Ef79"})
 - app.getArticle()
 
 ## Test
