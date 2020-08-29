@@ -8,15 +8,19 @@ App = {
   },
 
   initWeb3: function() {
+    console.log(ethereum);
     // initialize web3
     if(typeof web3 !== 'undefined') {
       //reuse the provider of the Web3 object injected by Metamask
-      App.web3Provider = web3.currentProvider;
+      App.web3Provider = ethereum;//web3.currentProvider;
+      web3 = new Web3(App.web3Provider);
+      ethereum.enable();
     } else {
       //create a new provider and plug it directly into our local node
       App.web3Provider = new Web3.providers.HttpProvider('http://localhost:7545');
+      web3 = new Web3(App.web3Provider);
     }
-    web3 = new Web3(App.web3Provider);
+
 
     App.displayAccountInfo();
 
