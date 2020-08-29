@@ -44,7 +44,6 @@ contract ("ChainList", function (accounts) {
      chainListInstance = instance;
      return chainListInstance.sellArticle(articleName, description, web3.utils.toWei(price.toString(), "ether"), {from: seller});
    }).then(function(receipt) {
-     console.log(receipt);
      assert.equal(receipt.logs.length, 1, "one event should have been triggered");
      assert.equal(receipt.logs[0].event, "LogSellArticle", "event should be LogSellArticle");
      assert.equal(receipt.logs[0].args._seller, seller, "event seller must be " + seller);
