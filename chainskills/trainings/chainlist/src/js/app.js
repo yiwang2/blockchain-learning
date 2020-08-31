@@ -8,7 +8,6 @@ App = {
   },
 
   initWeb3: function() {
-    console.log(ethereum);
     // initialize web3
     if(typeof web3 !== 'undefined') {
       //reuse the provider of the Web3 object injected by Metamask
