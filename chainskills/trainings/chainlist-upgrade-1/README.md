@@ -9,6 +9,7 @@
 
 ## Useful command
 
+- web3.eth.getAccounts().then(console.log)
 - truffle migrate --compile-all --reset --network ganache
 - truffle test --network ganache
 - npm install
