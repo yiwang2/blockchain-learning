@@ -6,6 +6,14 @@ module.exports = {
             host: "localhost",
             port: 7545,
             network_id: "*" // Match any network id
+        },
+        chainskills : {
+          host: "localhost",
+          port: 8545,
+          network_id: "4224",
+          //gas: 4700000 // if out of gas limit exception is thrown
+          //from : '0x4B0adEF60B570Aa73BE2cCe67923d6300bfB666c'
+          //not from first account: web3.eth.personal.unlockAccount("0x4B0adEF60B570Aa73BE2cCe67923d6300bfB666c", "pass1234").then(console.log("Unlocked"))
         }
     },
     // Configure your compilers
