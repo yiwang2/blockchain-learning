@@ -18,11 +18,13 @@
 
 - Need to create a private network
 ````
-Puppeth
+Puppeth (this is a eth network manager console)
 geth --datadir ./ChainSkills/private init ./ChainSkills/private/chainskills.json
 geth --datadir . account new
 geth --datadir . account list
 geth --networkid 4224 --mine --minerthreads 1 --datadir "./ChainSkills/private" --nodiscover --rpc --rpcport "8545" --port "30303" --rpccorsdomain "*" --nat "any" --rpcapi eth,web3,personal,net --unlock 0 --password ./ChainSkills/private/password.sec --ipcpath "~/Library/Ethereum/geth.ipc" --allow-insecure-unlock
 ````
-- add from : '0x4B0adEF60B570Aa73BE2cCe67923d6300bfB666c' if not from account 0
+- truffle migrate --compile-all --reset --network chainskills
+- truffle test --network chainskills
+- add from : '0x4B0adEF60B570Aa73BE2cCe67923d6300bfB666c' at truffle-config.js if not from account 0 
 - also need to do: web3.eth.personal.unlockAccount("0x4B0adEF60B570Aa73BE2cCe67923d6300bfB666c", "pass1234")
