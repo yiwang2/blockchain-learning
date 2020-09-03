@@ -48,6 +48,7 @@ App = {
 
 
   reloadArticles: async()=> {
+    console.log("App.loading: "+ App.loading);
     // avoid reentry
      if (App.loading) {
          return;
@@ -71,19 +72,56 @@ App = {
     const articlesRow = $('#articlesRow');
     // retrieve the article placeholder and clear it
     $('#articlesRow').empty();
+    var price = web3.utils.fromWei(article[4].toString(), "ether");
     // retrieve the article template and fill it
     var articleTemplate = $('#articleTemplate');
-    articleTemplate.find('.panel-title').text(article[1]);
-    articleTemplate.find('.article-description').text(article[2]);
-    articleTemplate.find('.article-price').text(web3.utils.fromWei(article[3].toString(), "ether"));
+    articleTemplate.find('.panel-title').text(article[2]);
+    articleTemplate.find('.article-description').text(article[3]);
+    articleTemplate.find('.article-price').text(price);
+    articleTemplate.find('.btn-buy').attr('data-value', price);
 
     var seller = article[0];
     if (seller == App.account) {
       seller = "You";
     }
     articleTemplate.find('.article-seller').text(seller);
+    // buyer
+    var buyer = article[1];
+    if(buyer == App.account){
+      buyer = "You";
+    } else if(buyer == 0X0) {
+      buyer = "No one yet";
+    }
+    articleTemplate.find('.article-buyer').text(buyer);
+
+    if(article[0] == App.account || article[1] != 0X0) {
+      articleTemplate.find('.btn-buy').hide();
+    } else {
+      articleTemplate.find('.btn-buy').show();
+    }
+
+
     // add this article
     articlesRow.append(articleTemplate.html());
+  },
+
+  buyArticle: async () => {
+    event.preventDefault();
+    const articlePriceValue = parseFloat($(event.target).data('value'));
+    console.log("Account: "+ App.account);
+    const articlePrice = isNaN(articlePriceValue) ? "0" : articlePriceValue.toString();
+    const _price = window.web3.utils.toWei(articlePrice, "ether");
+    const chainListInstance = await App.contracts.ChainList.deployed();
+    const transactionReceipt = await chainListInstance.buyArticle(
+                {
+                    from: App.account,
+                    value: _price,
+                    gas: 500000
+                }
+    ).on("transactionHash", hash => {
+      console.log("transaction hash", hash);
+    });
+    console.log("transaction receipt", transactionReceipt);
   },
 
   sellArticle: async () => {
@@ -115,13 +153,22 @@ App = {
     const chainListInstance = await App.contracts.ChainList.deployed();
     chainListInstance.LogSellArticle({fromBlock: '0'})
     .on("data", event => {
-        $('#' + event.id).remove();
-        $('#events').append('<li class="list-group-item" id="' + event.id + '">' + event.returnValues._name + ' is for sale</li>');
+        $("#events").append('<li class="list-group-item">' + event.args._name + ' is now for sale</li>');
         App.reloadArticles();
     })
     .on("error", error => {
         console.error(error);
     });
+
+    chainListInstance.LogBuyArticle({fromBlock: '0'})
+    .on("data", event => {
+      $("#events").append('<li class="list-group-item">' + event.args._buyer + ' bought ' + event.args._name + '</li>');
+      App.reloadArticles();
+    })
+    .on("error", error => {
+        console.error(error);
+    });
+
   },
 };
 
