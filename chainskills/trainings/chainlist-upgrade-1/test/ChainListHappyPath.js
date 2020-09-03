@@ -61,7 +61,7 @@ contract ("ChainList", function (accounts) {
 
      let data = await chainListInstance.getArticle();
      assert.equal(data[0], seller, "seller is "+ seller);
-     assert.equal(data[1], 0x0, "buyer is empty");
+     assert.equal(data[1], buyer, "buyer is "+buyer);
      assert.equal(data[2], articleName, "article name is "+ articleName);
      assert.equal(data[3], description, "description is "+ description);
      assert.equal(data[4].toString(), web3.utils.toWei(price.toString(), "ether").toString(), "article price is "+web3.utils.toWei(price.toString(), "ether"));
