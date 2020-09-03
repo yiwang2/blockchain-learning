@@ -38,7 +38,7 @@ contract ChainList {
     string memory _name,
     string memory _description,
     uint256 _price) {
-    return (seller, _buyer, name, description, price);
+    return (seller, buyer, name, description, price);
   }
 
   function buyArticle () payable public{
