@@ -48,7 +48,6 @@ App = {
 
 
   reloadArticles: async()=> {
-    console.log("App.loading: "+ App.loading);
     // avoid reentry
      if (App.loading) {
          return;
@@ -59,34 +58,40 @@ App = {
     App.displayAccountInfo();
     try {
       const chainListInstance = await App.contracts.ChainList.deployed();
-      let article = await chainListInstance.getArticle();
+      const articleIds = await chainListInstance.getArticlesForSale();
+      $('#articlesRow').empty();
+      for(let i = 0; i < articleIds.length; i++) {
+          const article = await chainListInstance.articles(articleIds[i]);
+          App.displayArticle(article);
+      }
       App.loading = false;
-      App.displayArticle(article);
     }catch(error) {
       console.error(error);
       App.loading = false;
     }
   },
 
+//article[0], article[1], article[3], article[4], article[5]
+//id, seller, name, description, price
   displayArticle: (article)=> {
     const articlesRow = $('#articlesRow');
-    // retrieve the article placeholder and clear it
-    $('#articlesRow').empty();
-    var price = web3.utils.fromWei(article[4].toString(), "ether");
+    var price = web3.utils.fromWei(article[5].toString(), "ether");
+    var id = article[0];
     // retrieve the article template and fill it
     var articleTemplate = $('#articleTemplate');
-    articleTemplate.find('.panel-title').text(article[2]);
-    articleTemplate.find('.article-description').text(article[3]);
+    articleTemplate.find('.panel-title').text(article[3]);
+    articleTemplate.find('.article-description').text(article[4]);
     articleTemplate.find('.article-price').text(price);
+    articleTemplate.find('.btn-buy').attr('data-id', id);
     articleTemplate.find('.btn-buy').attr('data-value', price);
 
-    var seller = article[0];
+    var seller = article[1];
     if (seller == App.account) {
       seller = "You";
     }
     articleTemplate.find('.article-seller').text(seller);
     // buyer
-    var buyer = article[1];
+    var buyer = article[2];
     if(buyer == App.account){
       buyer = "You";
     } else if(buyer == 0X0) {
@@ -94,25 +99,23 @@ App = {
     }
     articleTemplate.find('.article-buyer').text(buyer);
 
-    if(article[0] == App.account || article[1] != 0X0) {
+    if(article[1] == App.account || article[2] != 0X0) {
       articleTemplate.find('.btn-buy').hide();
     } else {
       articleTemplate.find('.btn-buy').show();
     }
-
-
     // add this article
     articlesRow.append(articleTemplate.html());
   },
 
   buyArticle: async () => {
     event.preventDefault();
-    const articlePriceValue = parseFloat($(event.target).data('value'));
-    console.log("Account: "+ App.account);
-    const articlePrice = isNaN(articlePriceValue) ? "0" : articlePriceValue.toString();
-    const _price = window.web3.utils.toWei(articlePrice, "ether");
-    const chainListInstance = await App.contracts.ChainList.deployed();
-    const transactionReceipt = await chainListInstance.buyArticle(
+    var _articleId = $(event.target).data('id');
+    var articlePriceValue = parseFloat($(event.target).data('value'));
+    var articlePrice = isNaN(articlePriceValue) ? "0" : articlePriceValue.toString();
+    var _price = window.web3.utils.toWei(articlePrice, "ether");
+    var chainListInstance = await App.contracts.ChainList.deployed();
+    var transactionReceipt = await chainListInstance.buyArticle(_articleId,
                 {
                     from: App.account,
                     value: _price,
