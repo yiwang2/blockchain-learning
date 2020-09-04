@@ -12,6 +12,7 @@
 - web3.eth.getAccounts().then(console.log)
 - truffle migrate --compile-all --reset --network ganache
 - truffle test --network ganache
+- truffle debug TxHash (for example: truffle debug 0xc1b6ab88090e5f1a95749b217ce58671f3e74f01d21b252c89a60ad23d434e17)
 - npm install
 - npm run dev
 
