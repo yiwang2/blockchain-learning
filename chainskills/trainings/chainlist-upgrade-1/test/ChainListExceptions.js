@@ -1,99 +1,133 @@
+// Contract to be tested
 const ChainList = artifacts.require("./ChainList.sol");
 
+// Test suite
+contract('ChainList', function (accounts) {
+    let chainListInstance;
+    const seller = accounts[1];
+    const buyer = accounts[2];
+    const articleId = 1;
+    const articleName = "article 1";
+    const articleDescription = "Description for article 1";
+    const articlePrice = web3.utils.toBN(10);
 
-contract ("ChainList", function (accounts) {
-  var chainListInstance;
-  var seller = accounts[1];
-  var buyer = accounts[2];
-  var articleName = "testException";
-  var description = "description exception";
-  var price = 2;
-
-  before("set up contract instance for each test", async () => {
+    before("set up contract instance for each test", async () => {
         chainListInstance = await ChainList.deployed();
-  });
+    });
 
-  it ("If no article for sale", async ()=> {
-    try {
-      await chainListInstance.buyArticle({
-             from: buyer,
-             value: web3.utils.toWei(price.toString(), "ether")
-      });
-      assert.fail();
-    } catch (error) {
-      assert(true);
-    }
+    // Test case: buying an article when no article for sale yet
+    it("should throw an exception if you try to buy an article when there is no article for sale", async () => {
+        try {
+            await chainListInstance.buyArticle(articleId, {
+                from: buyer,
+                value: web3.utils.toWei(articlePrice, "ether")
+            });
+            assert.fail();
+        } catch(error) {
+            assert.equal(error.reason, "There should be at least one article");
+        }
 
-    let data = await chainListInstance.getArticle();
-    assert.equal(data[0], 0x0, "seller is empty");
-    assert.equal(data[1], 0x0, "buyer is empty");
-    assert.equal(data[2], "", "article name is empty");
-    assert.equal(data[3], "", "description is empty");
-    assert.equal(data[4].toNumber(), 0, "article price is 0");
-  });
+        const numberOfArticles = await chainListInstance.getNumberOfArticles();
 
-  it ("if buy yourself", async ()=> {
-    await chainListInstance.sellArticle(articleName, description, web3.utils.toWei(price.toString(), "ether"), {from : seller});
-    try {
-      await chainListInstance.buyArticle({
-             from: seller,
-             value: web3.utils.toWei(price.toString(), "ether")
-      });
-      assert.fail();
-    }catch(error) {
-      assert(true);
-    }
+        //make sure sure the contract state was not altered
+        assert.equal(numberOfArticles.toNumber(), 0, "number of articles must be zero");
+    });
 
-    let data = await chainListInstance.getArticle();
-    assert.equal(data[0], seller, "seller is "+ seller);
-    assert.equal(data[1], 0x0, "buyer is empty");
-    assert.equal(data[2], articleName, "article name is "+ articleName);
-    assert.equal(data[3], description, "description is "+ description);
-    assert.equal(data[4].toString(), web3.utils.toWei(price.toString(), "ether").toString(), "article price is "+web3.utils.toWei(price.toString(), "ether"));
-  });
+    // Test case: buying an article that does not exist
+    it("should throw an exception if you try to buy an article that does not exist", async () => {
+        await chainListInstance.sellArticle(
+            articleName,
+            articleDescription,
+            web3.utils.toWei(articlePrice, "ether"), {
+                from: seller
+            }
+        );
 
-  it ("if buy with bad price", async ()=> {
-    //await chainListInstance.sellArticle(articleName, description, web3.utils.toWei(price.toString(), "ether"), {from : seller});
-    try {
-      await chainListInstance.buyArticle({
-             from: buyer,
-             value: web3.utils.toWei((price+1).toString(), "ether")
-      });
-      assert.fail();
-    }catch(error) {
-      assert(true);
-    }
+        try {
+            await chainListInstance.buyArticle(2, {
+                from: seller,
+                value: web3.utils.toWei(articlePrice, "ether")
+            });
+            assert.fail();
+        } catch(error) {
+            assert.equal(error.reason, "Article with this id does not exist");
+        }
 
-    let data = await chainListInstance.getArticle();
-    assert.equal(data[0], seller, "seller is "+ seller);
-    assert.equal(data[1], 0x0, "buyer is empty");
-    assert.equal(data[2], articleName, "article name is "+ articleName);
-    assert.equal(data[3], description, "description is "+ description);
-    assert.equal(data[4].toString(), web3.utils.toWei(price.toString(), "ether").toString(), "article price is "+web3.utils.toWei(price.toString(), "ether"));
-  });
+        const article = await chainListInstance.articles(articleId);
+        assert.equal(article[0].toNumber(), articleId, "article id must be " + articleId);
+        assert.equal(article[1], seller, "seller must be " + seller);
+        assert.equal(article[2], 0x0, "buyer must be empty");
+        assert.equal(article[3], articleName, "article name must be " + articleName);
+        assert.equal(article[4], articleDescription, "article description must be " + articleDescription);
+        assert.equal(article[5].toString(), web3.utils.toWei(articlePrice, "ether").toString(), "article price must be " + web3.utils.toWei(articlePrice, "ether"));
+    });
 
-  it ("if article is already sold", async ()=> {
-      //await chainListInstance.sellArticle(articleName, description, web3.utils.toWei(price.toString(), "ether"), {from : seller});
-      await chainListInstance.buyArticle({
-             from: buyer,
-             value: web3.utils.toWei((price).toString(), "ether")
-      });
-      try {
-        await chainListInstance.buyArticle({
-               from: buyer,
-               value: web3.utils.toWei((price).toString(), "ether")
+    // Test case: buying an article you are selling
+    it("should throw an exception if you try to buy your own article", async () => {
+        try {
+            await chainListInstance.buyArticle(articleId, {
+                from: seller,
+                value: web3.utils.toWei(articlePrice, "ether")
+            });
+            assert.fail();
+        } catch(error) {
+            assert.equal(error.reason, "Seller cannot buy his own article");
+        }
+
+        const article = await chainListInstance.articles(articleId);
+        //make sure sure the contract state was not altered
+        assert.equal(article[0].toNumber(), articleId, "article id must be " + articleId);
+        assert.equal(article[1], seller, "seller must be " + seller);
+        assert.equal(article[2], 0x0, "buyer must be empty");
+        assert.equal(article[3], articleName, "article name must be " + articleName);
+        assert.equal(article[4], articleDescription, "article description must be " + articleDescription);
+        assert.equal(article[5].toString(), web3.utils.toWei(articlePrice, "ether").toString(), "article price must be " + web3.utils.toWei(articlePrice, "ether"));
+    });
+
+    // Test case: incorrect value
+    it("should throw an exception if you try to buy an article for a value different from its price", async () => {
+        try {
+            await chainListInstance.buyArticle(articleId, {
+                from: buyer,
+                value: web3.utils.toWei(articlePrice + 1, "ether")
+            });
+        } catch(error) {
+            assert.equal(error.reason, "Value provided does not match price of article");
+        }
+
+        const article = await chainListInstance.articles(articleId);
+        //make sure sure the contract state was not altered
+        assert.equal(article[0].toNumber(), articleId, "article id must be " + articleId);
+        assert.equal(article[1], seller, "seller must be " + seller);
+        assert.equal(article[2], 0x0, "buyer must be empty");
+        assert.equal(article[3], articleName, "article name must be " + articleName);
+        assert.equal(article[4], articleDescription, "article description must be " + articleDescription);
+        assert.equal(article[5].toString(), web3.utils.toWei(articlePrice, "ether").toString(), "article price must be " + web3.utils.toWei(articlePrice, "ether"));
+    });
+
+    // Test case: article has already been sold
+    it("should throw an exception if you try to buy an article that has already been sold", async () => {
+        await chainListInstance.buyArticle(articleId, {
+            from: buyer,
+            value: web3.utils.toWei(articlePrice, "ether")
         });
-        assert.fail();
-      }catch (error) {
-        assert(true);
-      }
-      let data = await chainListInstance.getArticle();
-      assert.equal(data[0], seller, "seller is "+ seller);
-      assert.equal(data[1], buyer, "buyer is "+buyer); 
-      assert.equal(data[2], articleName, "article name is "+ articleName);
-      assert.equal(data[3], description, "description is "+ description);
-      assert.equal(data[4].toString(), web3.utils.toWei(price.toString(), "ether").toString(), "article price is "+web3.utils.toWei(price.toString(), "ether"));
+        try {
+            await chainListInstance.buyArticle(articleId, {
+                from: accounts[0],
+                value: web3.utils.toWei(articlePrice, "ether")
+            });
+            assert.fail();
+        } catch(error) {
+            assert.equal(error.reason, "Article was already sold");
+        }
 
-  });
-
+        const article = await chainListInstance.articles(articleId);
+        //make sure sure the contract state was not altered
+        assert.equal(article[0].toNumber(), articleId, "article id must be " + articleId);
+        assert.equal(article[1], seller, "seller must be " + seller);
+        assert.equal(article[2], buyer, "buyer must be " + buyer);
+        assert.equal(article[3], articleName, "article name must be " + articleName);
+        assert.equal(article[4], articleDescription, "article description must be " + articleDescription);
+        assert.equal(article[5].toString(), web3.utils.toWei(articlePrice, "ether").toString(), "article price must be " + web3.utils.toWei(articlePrice, "ether"));
+    });
 });
