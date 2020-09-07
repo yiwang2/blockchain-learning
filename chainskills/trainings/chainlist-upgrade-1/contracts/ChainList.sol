@@ -1,6 +1,8 @@
 pragma solidity >=0.4.22 <0.8.0;
 
-contract ChainList {
+import "./Ownable.sol";
+
+contract ChainList is Ownable {
 //custom types
 struct Article {
   uint id;
@@ -27,6 +29,11 @@ uint articleCounter;
     string _name,
     uint256 _price
   );
+
+  // kill the smart contract
+  function kill() public onlyOwner {
+      selfdestruct(owner);
+  }
 
   //sell an article
   function sellArticle (string memory _name, string memory _description, uint256 _price) public {
