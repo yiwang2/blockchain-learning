@@ -30,3 +30,10 @@ geth --networkid 4224 --mine --minerthreads 1 --datadir "./ChainSkills/private" 
 - truffle test --network chainskills
 - add from : '0x4B0adEF60B570Aa73BE2cCe67923d6300bfB666c' at truffle-config.js if not from account 0 
 - also need to do: web3.eth.personal.unlockAccount("0x4B0adEF60B570Aa73BE2cCe67923d6300bfB666c", "pass1234")
+
+## Deploy into Rinkeby
+
+- geth --rinkeby account new
+- geth --rinkeby --rpc --rpcapi="personal,eth,network,web3,net" --ipcpath "~/Library/Ethereum/geth.ipc"
+- geth attach (run eth.syncing to check syncing state)
+- go to https://faucet.rinkeby.io/ to have ETH
