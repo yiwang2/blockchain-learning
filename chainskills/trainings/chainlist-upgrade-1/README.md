@@ -37,3 +37,4 @@ geth --networkid 4224 --mine --minerthreads 1 --datadir "./ChainSkills/private" 
 - geth --rinkeby --rpc --rpcapi="personal,eth,network,web3,net" --ipcpath "~/Library/Ethereum/geth.ipc"
 - geth attach (run eth.syncing to check syncing state)
 - go to https://faucet.rinkeby.io/ to have ETH
+- truffle migrate --compile-all --reset --network rinkeby
