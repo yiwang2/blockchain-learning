@@ -14,6 +14,12 @@ module.exports = {
           //gas: 4700000 // if out of gas limit exception is thrown
           //from : '0x4B0adEF60B570Aa73BE2cCe67923d6300bfB666c'
           //not from first account: web3.eth.personal.unlockAccount("0x4B0adEF60B570Aa73BE2cCe67923d6300bfB666c", "pass1234").then(console.log("Unlocked"))
+        },
+        rinkeby: {
+            host: "localhost",
+            port: 8545,
+            network_id: 4, // Rinkeby test network
+            gas: 4700000
         }
     },
     // Configure your compilers
